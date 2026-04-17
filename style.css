@@ -70,8 +70,8 @@ body {
   position: sticky;
   top: 0;
   z-index: 50;
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
   align-items: center;
   gap: 1rem;
   padding: 0.75rem 1rem;
@@ -114,6 +114,49 @@ body {
   display: flex;
   align-items: center;
   gap: 0.6rem;
+  justify-self: end;
+}
+
+.creator-badge {
+  justify-self: center;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  text-decoration: none;
+  padding: 0.45rem 0.9rem;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--primary) 35%, var(--border));
+  background:
+    linear-gradient(var(--bg-elev), var(--bg-elev)) padding-box,
+    linear-gradient(135deg, var(--primary), var(--primary-2), var(--accent)) border-box;
+  color: var(--text);
+  font-size: 0.9rem;
+  font-weight: 700;
+  box-shadow: 0 8px 20px color-mix(in srgb, var(--primary) 20%, transparent);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.creator-badge strong {
+  background: linear-gradient(135deg, var(--primary), var(--accent));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.creator-star {
+  color: var(--primary);
+  animation: glowPulse 1.8s ease-in-out infinite;
+}
+
+.creator-badge:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 12px 24px color-mix(in srgb, var(--primary) 30%, transparent);
+}
+
+@keyframes glowPulse {
+  0% { transform: scale(1); opacity: 0.8; }
+  50% { transform: scale(1.18); opacity: 1; }
+  100% { transform: scale(1); opacity: 0.8; }
 }
 
 .search-shell {
@@ -746,6 +789,11 @@ pre {
     display: inline-flex;
   }
 
+  .creator-badge {
+    font-size: 0.82rem;
+    padding: 0.38rem 0.72rem;
+  }
+
   .hero {
     grid-template-columns: 1fr;
   }
@@ -764,6 +812,26 @@ pre {
 }
 
 @media (max-width: 720px) {
+  .topbar {
+    grid-template-columns: auto auto;
+    grid-template-areas:
+      "brand actions"
+      "creator creator";
+  }
+
+  .brand {
+    grid-area: brand;
+  }
+
+  .topbar-actions {
+    grid-area: actions;
+  }
+
+  .creator-badge {
+    grid-area: creator;
+    justify-self: start;
+  }
+
   .search-shell {
     min-width: 0;
     width: 46vw;
