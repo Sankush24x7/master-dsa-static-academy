@@ -960,16 +960,26 @@ function renderDeepDiveDetails(chapter) {
 
 function renderSourceLinks(chapter) {
   const chapterLinks = CURATED_CHAPTER_LINKS[chapter.id] || {};
-  const resources = SOURCE_META.map((source) => ({
-    ...source,
-    url: chapterLinks[source.key] || STATIC_SOURCE_FALLBACKS[source.key] || "https://visualgo.net/en"
-  }));
+  const resources = SOURCE_META.map((source) => {
+    const url = chapterLinks[source.key] || STATIC_SOURCE_FALLBACKS[source.key] || "https://visualgo.net/en";
+    // CP-Algorithms fallback for users whose network blocks the domain/SSL chain.
+    const fallbackUrl =
+      source.key === "cpalgo"
+        ? (chapterLinks.gfg || chapterLinks.wikipedia || STATIC_SOURCE_FALLBACKS.programiz)
+        : "";
+
+    return {
+      ...source,
+      url,
+      fallbackUrl
+    };
+  });
 
   return `
     <div class="source-links">
       ${resources
         .map(
-          (r) => `<a class="source-btn" style="--src-color:${r.color}" href="${r.url}" target="_blank" rel="noopener noreferrer">
+          (r) => `<a class="source-btn" style="--src-color:${r.color}" href="${r.url}" data-source-key="${r.key}" data-primary-url="${r.url}" data-fallback-url="${r.fallbackUrl}" target="_blank" rel="noopener noreferrer">
             <span>${r.icon}</span>${r.name}
           </a>`
         )
@@ -1119,6 +1129,16 @@ function wireChapterActions(chapter, prev, next) {
   });
 }
 
+async function isUrlReachable(url) {
+  try {
+    // no-cors lets us perform a lightweight network reachability test across domains.
+    await fetch(url, { method: "GET", mode: "no-cors", cache: "no-store" });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 function toggleCompleted(id) {
   if (state.completed.includes(id)) {
     state.completed = state.completed.filter((item) => item !== id);
@@ -1205,6 +1225,25 @@ function bindGlobalEvents() {
     if (!target) return;
     renderChapter(Number(target.getAttribute("data-bookmark-open")));
     document.getElementById("chapters")?.scrollIntoView({ behavior: "smooth" });
+  });
+
+  refs.chapterContent.addEventListener("click", async (event) => {
+    const link = event.target.closest(".source-btn");
+    if (!link) return;
+
+    const sourceKey = link.getAttribute("data-source-key");
+    if (sourceKey !== "cpalgo") return;
+
+    event.preventDefault();
+
+    const primaryUrl = link.getAttribute("data-primary-url") || link.getAttribute("href");
+    const fallbackUrl = link.getAttribute("data-fallback-url") || link.getAttribute("href");
+
+    const newTab = window.open("about:blank", "_blank", "noopener,noreferrer");
+    if (!newTab) return;
+
+    const ok = await isUrlReachable(primaryUrl);
+    newTab.location.href = ok ? primaryUrl : fallbackUrl;
   });
 
   refs.saveNotesBtn.addEventListener("click", () => {
