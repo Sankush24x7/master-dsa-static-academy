@@ -898,6 +898,66 @@ const CURATED_CHAPTER_LINKS = {
   35: { leetcode: "https://leetcode.com/assessment/", gfg: "https://www.geeksforgeeks.org/how-to-prepare-for-online-assessment-tests-for-software-companies/", wikipedia: "https://en.wikipedia.org/wiki/Pre-employment_testing", cpalgo: "https://cp-algorithms.com/", visualgo: "https://visualgo.net/en" }
 };
 
+const TOPIC_EXTRA_NOTES = {
+  1: "Think in operations first: insert, delete, find, update, and range query. Data-structure choice should come before coding details.",
+  2: "Count dominant operations as input scales. Ignore constants, compare growth classes, and defend complexity with loop and recursion-tree reasoning.",
+  3: "Include auxiliary arrays, recursion depth, and temporary copies. Many interview optimizations come from replacing extra memory with in-place transitions.",
+  4: "Array problems often unlock with index arithmetic, prefix summaries, and boundary handling. Strong index discipline prevents most implementation bugs.",
+  5: "String questions usually reduce to frequency counting, pattern matching, or window boundaries. Be explicit about charset assumptions and case handling.",
+  6: "Recursion is state modeling. Define base case, recursive progress, and return merge rule. If depth is risky, convert to iterative stack.",
+  7: "Sorting is a preprocessing tool. Sort once, then solve with linear scans, binary search, interval merging, or greedy selection.",
+  8: "Binary search needs monotonic truth. Define invariant, boundaries, and move rule clearly before writing the loop.",
+  9: "Hashing trades memory for speed. Use hash map for counts/indexes and hash set for existence checks.",
+  10: "Two pointers work when movement can be proven safe. Sorted order or constraints justify shrinking search space in O(n).",
+  11: "Linked-list mastery is pointer safety. Preserve next pointer before rewiring and use dummy nodes to simplify head edge cases.",
+  12: "Stacks solve nested dependencies. Decide what each stack element represents: value, index, or state snapshot.",
+  13: "Queues model ordered processing. BFS and scheduling both rely on enqueue/dequeue invariants and careful visited-state timing.",
+  14: "Sliding window requires an explicit invalid condition. Expand to explore, shrink to restore validity, and update answer at the right moment.",
+  15: "Prefix sum converts repeated range work to O(1) query time. The critical skill is consistent index framing.",
+  16: "Tree problems become easier with subtree contracts: what each recursive call guarantees when it returns.",
+  17: "BST efficiency depends on height. Always mention balanced vs skewed behavior when discussing time complexity.",
+  18: "Heaps are for top-k and priority extraction, not full sorting. Keep heap size controlled for best performance.",
+  19: "Greedy is valid only with proof intuition: local optimal choices must preserve global optimality.",
+  20: "Backtracking is controlled brute force. Add pruning early and always undo mutable state between branches.",
+  21: "Graph success starts with representation: adjacency list for sparse graphs, matrix for dense graphs.",
+  22: "DFS is exploration depth-first. Use recursion stack logic for directed-cycle detection and postorder dependencies.",
+  23: "BFS guarantees shortest path in unweighted graphs because nodes are visited in increasing edge distance.",
+  24: "DP requires state design first, transition second. Bad state definitions create exponential complexity or invalid recurrences.",
+  25: "Trie is ideal for prefix-heavy workloads like autocomplete and dictionary checks with shared prefixes.",
+  26: "Segment tree handles dynamic range queries with updates. Correct overlap-case handling is the core implementation challenge.",
+  27: "Union-Find solves dynamic connectivity efficiently with path compression and union-by-rank or size.",
+  28: "Bit manipulation is constant-time state encoding. Practice masks, toggles, subsets, and XOR identities.",
+  29: "Advanced DP often needs dimensional thinking: index + constraint + decision. Reduce dimensions when transition allows rolling states.",
+  30: "Shortest path selection depends on edge constraints: BFS (unweighted), Dijkstra (non-negative), Bellman-Ford (negative edges).",
+  31: "Pattern recognition is interview acceleration. Classify by constraints before code to avoid wrong-template implementation.",
+  32: "Top-100 practice should be revision-driven. Track mistakes, revisit weak patterns, and measure time-to-solution improvement.",
+  33: "Mock rounds test communication, not only code. Narrate trade-offs, test cases, and complexity under time pressure.",
+  34: "Resume quality is leverage. Use action + impact + metric bullets and ensure claims are defendable in interviews.",
+  35: "OA clearing is execution strategy: triage quickly, secure easy points, then attack medium/hard with checkpoints."
+};
+
+function renderDeepDiveDetails(chapter) {
+  const note = TOPIC_EXTRA_NOTES[chapter.id] || "Use constraint-first thinking and map the problem to a proven pattern.";
+  const refs = CURATED_CHAPTER_LINKS[chapter.id] || {};
+  const referenceLinks = [
+    refs.cpalgo ? `<a href="${refs.cpalgo}" target="_blank" rel="noopener noreferrer">CP-Algorithms</a>` : "",
+    refs.gfg ? `<a href="${refs.gfg}" target="_blank" rel="noopener noreferrer">GeeksforGeeks</a>` : "",
+    refs.wikipedia ? `<a href="${refs.wikipedia}" target="_blank" rel="noopener noreferrer">Wikipedia</a>` : ""
+  ].filter(Boolean);
+
+  return `
+    <section class="card-block">
+      <h4>Deep Dive (Reference-backed)</h4>
+      <p>${note}</p>
+      <ul>
+        <li>Interview checklist: define constraints, pick pattern, justify complexity, test edge cases.</li>
+        <li>Implementation checklist: maintain invariant, update state safely, verify corner inputs.</li>
+      </ul>
+      <p class="muted">Reference reading: ${referenceLinks.length ? referenceLinks.join(" | ") : "Use curated source links below."}</p>
+    </section>
+  `;
+}
+
 function renderSourceLinks(chapter) {
   const chapterLinks = CURATED_CHAPTER_LINKS[chapter.id] || {};
   const resources = SOURCE_META.map((source) => ({
@@ -964,6 +1024,7 @@ function renderChapter(id) {
     <div class="chapter-grid">
       <section class="card-block"><h4>Why It Matters</h4><p>${chapter.why}</p></section>
       <section class="card-block"><h4>Theory Explanation</h4><p>${chapter.theory}</p></section>
+      ${renderDeepDiveDetails(chapter)}
       <section class="card-block"><h4>Visual Diagram (HTML/CSS)</h4>${renderDiagram(chapter.diagram)}</section>
       <section class="card-block"><h4>Real World Use Case</h4><p>${chapter.useCase}</p></section>
       <section class="card-block"><h4>Complexity Table</h4>${renderComplexity(chapter.complexity)}</section>
