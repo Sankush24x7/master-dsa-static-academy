@@ -7,7 +7,8 @@
   streak: "dsa_streak",
   goal: "dsa_goal",
   phases: "dsa_phase_state",
-  trackMode: "dsa_track_mode"
+  trackMode: "dsa_track_mode",
+  companyFilter: "dsa_company_filter"
 };
 
 const roadmapPhasesByTrack = {
@@ -118,6 +119,69 @@ const ROLE_PATHS = [
       "Pair advanced DSA with architecture trade-off thinking.",
       "Practice shortest path, DSU, and advanced DP reasoning.",
       "Convert algorithm decisions into scalable design narratives."
+    ]
+  }
+];
+
+const COMPANY_SHEETS = [
+  {
+    id: "tcs",
+    name: "TCS NQT Sheet",
+    category: "service",
+    rounds: "Aptitude + Easy/Medium Coding",
+    target: "Campus and fresher hiring rounds",
+    tags: ["Arrays", "Strings", "Basic DP", "Hashing"],
+    links: [
+      { label: "Practice Set", url: "https://www.geeksforgeeks.org/tcs-interview-experience/" },
+      { label: "Easy DSA", url: "https://leetcode.com/problemset/?difficulty=EASY" }
+    ]
+  },
+  {
+    id: "infosys",
+    name: "Infosys OA Sheet",
+    category: "service",
+    rounds: "OA + Technical Interview",
+    target: "Fresher service-company preparation",
+    tags: ["Two Pointer", "Sorting", "Recursion", "Sliding Window"],
+    links: [
+      { label: "Prep Guide", url: "https://www.geeksforgeeks.org/infosys-interview-experience/" },
+      { label: "OA Drills", url: "https://www.geeksforgeeks.org/top-50-array-coding-problems-for-interviews/" }
+    ]
+  },
+  {
+    id: "accenture",
+    name: "Accenture Coding Sheet",
+    category: "service",
+    rounds: "Cognitive + Coding + Interview",
+    target: "Entry-level and campus placement rounds",
+    tags: ["Prefix Sum", "Queue", "Greedy", "Binary Search"],
+    links: [
+      { label: "Interview Archive", url: "https://www.geeksforgeeks.org/accenture-interview-experience/" },
+      { label: "Core DSA Set", url: "https://www.geeksforgeeks.org/top-100-data-structure-and-algorithms-dsa-interview-questions-topic-wise/" }
+    ]
+  },
+  {
+    id: "faang-core",
+    name: "FAANG Core DSA Sheet",
+    category: "product",
+    rounds: "DSA Interview Loop",
+    target: "Product-based company preparation",
+    tags: ["Trees", "Graphs", "Heap", "Backtracking", "DP"],
+    links: [
+      { label: "Top Interview 150", url: "https://leetcode.com/studyplan/top-interview-150/" },
+      { label: "Blind 75", url: "https://leetcode.com/problem-list/oizxjoit/" }
+    ]
+  },
+  {
+    id: "faang-advanced",
+    name: "FAANG Advanced Patterns",
+    category: "product",
+    rounds: "Senior/Experienced DSA Rounds",
+    target: "High-depth optimization and design-oriented discussions",
+    tags: ["Advanced DP", "Shortest Path", "Union Find", "Segment Tree"],
+    links: [
+      { label: "CP-Algorithms", url: "https://cp-algorithms.com/" },
+      { label: "Hard Problem Set", url: "https://leetcode.com/problemset/?difficulty=HARD" }
     ]
   }
 ];
@@ -744,6 +808,8 @@ const refs = {
   trackHint: document.getElementById("trackHint"),
   rolePathGrid: document.getElementById("rolePathGrid"),
   rolePathStatus: document.getElementById("rolePathStatus"),
+  companyFilter: document.getElementById("companyFilter"),
+  companySheetGrid: document.getElementById("companySheetGrid"),
   notesArea: document.getElementById("notesArea"),
   notesStatus: document.getElementById("notesStatus"),
   saveNotesBtn: document.getElementById("saveNotesBtn"),
@@ -770,12 +836,16 @@ let state = {
     "Interview Mastery": false
   }),
   trackMode: localStorage.getItem(STORAGE_KEYS.trackMode) || "fresher",
+  companyFilter: localStorage.getItem(STORAGE_KEYS.companyFilter) || "all",
   goal: readJson(STORAGE_KEYS.goal, { date: todayKey(), target: 2, solved: 0 }),
   streak: readJson(STORAGE_KEYS.streak, { lastDate: todayKey(), count: 1 })
 };
 
 if (!["fresher", "experienced"].includes(state.trackMode)) {
   state.trackMode = "fresher";
+}
+if (!["all", "service", "product"].includes(state.companyFilter)) {
+  state.companyFilter = "all";
 }
 
 // Normalize phase defaults so fresh users see only Beginner expanded.
@@ -918,6 +988,44 @@ function activateRolePath(pathId, action = "activate") {
   if (refs.rolePathStatus) {
     refs.rolePathStatus.textContent = `Active path: ${selected.title} • Track: ${selected.mode === "fresher" ? "Fresher" : "Experienced"} • Start Chapter: ${selected.startChapter}`;
   }
+}
+
+function renderCompanyFilterUI() {
+  if (!refs.companyFilter) return;
+  refs.companyFilter.querySelectorAll("[data-company-filter]").forEach((button) => {
+    const active = button.getAttribute("data-company-filter") === state.companyFilter;
+    button.classList.toggle("active", active);
+    button.setAttribute("aria-selected", String(active));
+  });
+}
+
+function renderCompanySheets() {
+  if (!refs.companySheetGrid) return;
+  const visible = COMPANY_SHEETS.filter((sheet) => state.companyFilter === "all" || sheet.category === state.companyFilter);
+
+  refs.companySheetGrid.innerHTML = visible
+    .map(
+      (sheet) => `
+      <article class="company-sheet-card fade-in">
+        <div class="company-sheet-head">
+          <h3>${sheet.name}</h3>
+          <span class="company-badge">${sheet.category === "service" ? "Service" : "FAANG Style"}</span>
+        </div>
+        <p class="company-sheet-meta">Rounds: ${sheet.rounds}</p>
+        <p class="company-sheet-meta">Goal: ${sheet.target}</p>
+        <div class="company-tags">
+          ${sheet.tags.map((tag) => `<span class="company-tag">${tag}</span>`).join("")}
+        </div>
+        <div class="company-links">
+          ${sheet.links
+            .map((link) => `<a class="btn btn-ghost small" href="${link.url}" target="_blank" rel="noopener noreferrer">${link.label}</a>`)
+            .join("")}
+        </div>
+      </article>`
+    )
+    .join("");
+
+  renderCompanyFilterUI();
 }
 
 function renderRoadmap() {
@@ -1408,6 +1516,17 @@ function bindGlobalEvents() {
     activateRolePath(pathId, action);
   });
 
+  refs.companyFilter?.addEventListener("click", (event) => {
+    const target = event.target.closest("[data-company-filter]");
+    if (!target) return;
+    const filter = target.getAttribute("data-company-filter");
+    if (!["all", "service", "product"].includes(filter)) return;
+    if (filter === state.companyFilter) return;
+    state.companyFilter = filter;
+    localStorage.setItem(STORAGE_KEYS.companyFilter, filter);
+    renderCompanySheets();
+  });
+
   refs.chapterSearch.addEventListener("input", () => {
     renderNav(refs.chapterSearch.value);
   });
@@ -1493,6 +1612,7 @@ function init() {
   initGoal();
   renderRoadmap();
   renderRolePaths();
+  renderCompanySheets();
   renderPhaseControls();
   renderNav();
   renderBookmarks();
