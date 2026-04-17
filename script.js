@@ -189,6 +189,51 @@ const COMPANY_SHEETS = [
   }
 ];
 
+const COMMUNICATION_TEMPLATES = [
+  {
+    id: "brute-force",
+    title: "Explain Brute Force",
+    intent: "Start with baseline so interviewer sees your reasoning path.",
+    script:
+      "I will first explain the brute-force solution for correctness.\nI can check every candidate pair/window/state and compute the answer directly.\nThis works, but time complexity is O(n^2) (or higher based on nested loops), so it may not scale for large constraints."
+  },
+  {
+    id: "optimization-shift",
+    title: "Move to Optimized Approach",
+    intent: "Transition from baseline to better pattern.",
+    script:
+      "Now I will optimize by avoiding repeated work.\nInstead of recalculating from scratch, I will maintain incremental state using [hash map / two pointers / prefix sum / heap].\nThis reduces complexity to O(n) or O(n log n), which fits the input limits."
+  },
+  {
+    id: "complexity-summary",
+    title: "Complexity Summary",
+    intent: "Give crisp final analysis.",
+    script:
+      "Final complexity:\nTime = O(...)\nSpace = O(...)\nBottleneck operation is ...\nIf memory constraints are strict, we can trade to an in-place variant with ... trade-off."
+  },
+  {
+    id: "edge-cases",
+    title: "Edge Case Walkthrough",
+    intent: "Demonstrate reliability and test discipline.",
+    script:
+      "Before coding, I want to validate edge cases:\n1) Empty or single-element input\n2) Duplicate values\n3) Already sorted / reverse sorted\n4) Minimum and maximum constraint boundaries\nI will dry-run one example to verify pointer/index updates."
+  },
+  {
+    id: "code-while-speaking",
+    title: "Narrate While Coding",
+    intent: "Maintain communication during implementation.",
+    script:
+      "I am defining variables left/right (or map/dp) to preserve this invariant: ...\nAt each iteration, I update ... because ...\nThis condition prevents out-of-bounds and ensures progress toward termination."
+  },
+  {
+    id: "final-verification",
+    title: "Final Verification",
+    intent: "Close interview answer professionally.",
+    script:
+      "I will run one normal test and one edge test quickly.\nExpected output is ...\nGiven the checks pass, this solution is correct with the stated complexity.\nIf needed, I can also discuss alternative approaches and trade-offs."
+  }
+];
+
 const chapters = [
   {
     id: 1,
@@ -824,6 +869,8 @@ const refs = {
   mockTimer: document.getElementById("mockTimer"),
   mockQuestions: document.getElementById("mockQuestions"),
   mockResult: document.getElementById("mockResult"),
+  templateGrid: document.getElementById("templateGrid"),
+  templateStatus: document.getElementById("templateStatus"),
   notesArea: document.getElementById("notesArea"),
   notesStatus: document.getElementById("notesStatus"),
   saveNotesBtn: document.getElementById("saveNotesBtn"),
@@ -1276,6 +1323,25 @@ function renderCompanySheets() {
     .join("");
 
   renderCompanyFilterUI();
+}
+
+function renderCommunicationTemplates() {
+  if (!refs.templateGrid) return;
+  refs.templateGrid.innerHTML = COMMUNICATION_TEMPLATES.map(
+    (tpl) => `
+      <article class="template-card fade-in">
+        <h3>${tpl.title}</h3>
+        <p class="template-meta">${tpl.intent}</p>
+        <div class="template-script">${tpl.script}</div>
+        <div class="template-actions">
+          <button class="btn btn-primary small" data-template-copy="${tpl.id}">Copy Template</button>
+        </div>
+      </article>`
+  ).join("");
+
+  if (refs.templateStatus) {
+    refs.templateStatus.textContent = "Tip: read these scripts aloud during mock practice to build confident communication flow.";
+  }
 }
 
 function renderRoadmap() {
@@ -1830,6 +1896,20 @@ function bindGlobalEvents() {
     renderMockQuestions();
   });
 
+  refs.templateGrid?.addEventListener("click", async (event) => {
+    const trigger = event.target.closest("[data-template-copy]");
+    if (!trigger) return;
+    const id = trigger.getAttribute("data-template-copy");
+    const selected = COMMUNICATION_TEMPLATES.find((tpl) => tpl.id === id);
+    if (!selected) return;
+    try {
+      await navigator.clipboard.writeText(selected.script);
+      if (refs.templateStatus) refs.templateStatus.textContent = `Copied: ${selected.title}`;
+    } catch {
+      if (refs.templateStatus) refs.templateStatus.textContent = "Clipboard permission blocked. Copy manually from the template card.";
+    }
+  });
+
   refs.chapterSearch.addEventListener("input", () => {
     renderNav(refs.chapterSearch.value);
   });
@@ -1918,6 +1998,7 @@ function init() {
   renderRolePaths();
   renderCompanySheets();
   renderRevisionPlanner();
+  renderCommunicationTemplates();
   renderPhaseControls();
   renderNav();
   renderBookmarks();

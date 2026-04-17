@@ -802,6 +802,48 @@ body {
   background: color-mix(in srgb, var(--accent) 8%, transparent);
 }
 
+.template-grid {
+  display: grid;
+  gap: 0.8rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.template-card {
+  background: var(--bg-elev);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 0.9rem;
+  box-shadow: var(--shadow);
+}
+
+.template-card h3,
+.template-card p {
+  margin: 0;
+}
+
+.template-meta {
+  margin-top: 0.35rem;
+  color: var(--muted);
+}
+
+.template-script {
+  margin-top: 0.55rem;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 0.6rem;
+  background: color-mix(in srgb, var(--primary) 5%, transparent);
+  color: var(--text);
+  line-height: 1.5;
+  white-space: pre-wrap;
+}
+
+.template-actions {
+  margin-top: 0.6rem;
+  display: flex;
+  gap: 0.45rem;
+  flex-wrap: wrap;
+}
+
 .phase-card {
   background: var(--bg-elev);
   border: 1px solid var(--border);
@@ -1132,6 +1174,10 @@ pre {
   .mock-controls {
     align-items: stretch;
   }
+
+  .template-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 720px) {
@@ -1166,6 +1212,7 @@ pre {
   .role-path-grid,
   .company-sheet-grid,
   .revision-grid,
+  .template-grid,
   .hero-stats {
     grid-template-columns: 1fr;
   }
