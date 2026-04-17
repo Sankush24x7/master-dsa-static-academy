@@ -667,6 +667,48 @@ body {
   flex-wrap: wrap;
 }
 
+.revision-grid {
+  display: grid;
+  gap: 0.8rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.revision-list {
+  margin-top: 0.5rem;
+  display: grid;
+  gap: 0.55rem;
+}
+
+.revision-item {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 0.65rem;
+  background: color-mix(in srgb, var(--primary) 5%, transparent);
+}
+
+.revision-item p {
+  margin: 0;
+  color: var(--muted);
+}
+
+.revision-item .title {
+  margin: 0;
+  font-weight: 800;
+  color: var(--text);
+}
+
+.revision-item .meta {
+  margin-top: 0.25rem;
+  font-size: 0.86rem;
+}
+
+.revision-actions {
+  margin-top: 0.45rem;
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+
 .phase-card {
   background: var(--bg-elev);
   border: 1px solid var(--border);
@@ -989,6 +1031,10 @@ pre {
   .company-sheet-grid {
     grid-template-columns: 1fr;
   }
+
+  .revision-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 720px) {
@@ -1022,6 +1068,7 @@ pre {
   .roadmap-grid,
   .role-path-grid,
   .company-sheet-grid,
+  .revision-grid,
   .hero-stats {
     grid-template-columns: 1fr;
   }

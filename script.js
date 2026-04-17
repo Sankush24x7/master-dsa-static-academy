@@ -8,7 +8,9 @@
   goal: "dsa_goal",
   phases: "dsa_phase_state",
   trackMode: "dsa_track_mode",
-  companyFilter: "dsa_company_filter"
+  companyFilter: "dsa_company_filter",
+  completedMeta: "dsa_completed_meta",
+  revisionLog: "dsa_revision_log"
 };
 
 const roadmapPhasesByTrack = {
@@ -810,6 +812,8 @@ const refs = {
   rolePathStatus: document.getElementById("rolePathStatus"),
   companyFilter: document.getElementById("companyFilter"),
   companySheetGrid: document.getElementById("companySheetGrid"),
+  revisionDueList: document.getElementById("revisionDueList"),
+  revisionUpcomingList: document.getElementById("revisionUpcomingList"),
   notesArea: document.getElementById("notesArea"),
   notesStatus: document.getElementById("notesStatus"),
   saveNotesBtn: document.getElementById("saveNotesBtn"),
@@ -837,6 +841,8 @@ let state = {
   }),
   trackMode: localStorage.getItem(STORAGE_KEYS.trackMode) || "fresher",
   companyFilter: localStorage.getItem(STORAGE_KEYS.companyFilter) || "all",
+  completedMeta: readJson(STORAGE_KEYS.completedMeta, {}),
+  revisionLog: readJson(STORAGE_KEYS.revisionLog, {}),
   goal: readJson(STORAGE_KEYS.goal, { date: todayKey(), target: 2, solved: 0 }),
   streak: readJson(STORAGE_KEYS.streak, { lastDate: todayKey(), count: 1 })
 };
@@ -847,6 +853,12 @@ if (!["fresher", "experienced"].includes(state.trackMode)) {
 if (!["all", "service", "product"].includes(state.companyFilter)) {
   state.companyFilter = "all";
 }
+state.completed.forEach((chapterId) => {
+  const key = String(chapterId);
+  if (!state.completedMeta[key]) {
+    state.completedMeta[key] = todayKey();
+  }
+});
 
 // Normalize phase defaults so fresh users see only Beginner expanded.
 state.phaseState = {
@@ -872,6 +884,79 @@ function saveJson(key, value) {
 
 function todayKey() {
   return new Date().toISOString().slice(0, 10);
+}
+
+function addDays(dateStr, days) {
+  const dt = new Date(`${dateStr}T00:00:00`);
+  dt.setDate(dt.getDate() + days);
+  return dt.toISOString().slice(0, 10);
+}
+
+function dateDiffInDays(fromDateStr, toDateStr) {
+  const a = new Date(`${fromDateStr}T00:00:00`);
+  const b = new Date(`${toDateStr}T00:00:00`);
+  return Math.round((b - a) / (1000 * 60 * 60 * 24));
+}
+
+function getRevisionTasks() {
+  const intervals = [1, 3, 7];
+  const today = todayKey();
+  const due = [];
+  const upcoming = [];
+
+  Object.entries(state.completedMeta).forEach(([chapterId, completedAt]) => {
+    const chapter = chapters.find((c) => c.id === Number(chapterId));
+    if (!chapter || !completedAt) return;
+
+    intervals.forEach((interval) => {
+      const dueDate = addDays(completedAt, interval);
+      const doneAt = state.revisionLog?.[chapterId]?.[String(interval)];
+      const task = {
+        chapterId: Number(chapterId),
+        chapterTitle: chapter.title,
+        interval,
+        dueDate,
+        doneAt
+      };
+
+      if (!doneAt && dueDate <= today) due.push(task);
+      if (!doneAt) {
+        const daysLeft = dateDiffInDays(today, dueDate);
+        if (daysLeft > 0 && daysLeft <= 3) upcoming.push({ ...task, daysLeft });
+      }
+    });
+  });
+
+  due.sort((a, b) => a.dueDate.localeCompare(b.dueDate) || a.chapterId - b.chapterId);
+  upcoming.sort((a, b) => a.daysLeft - b.daysLeft || a.chapterId - b.chapterId);
+  return { due, upcoming };
+}
+
+function renderRevisionItems(items, listType) {
+  if (!items.length) {
+    return `<p class="muted">${listType === "due" ? "No due revisions today. Great consistency." : "No upcoming revisions in the next 3 days."}</p>`;
+  }
+
+  return items
+    .map(
+      (item) => `
+      <article class="revision-item">
+        <p class="title">${item.chapterId}. ${item.chapterTitle}</p>
+        <p class="meta">Revision: Day ${item.interval} • Due: ${item.dueDate}${item.daysLeft ? ` • In ${item.daysLeft} day(s)` : ""}</p>
+        <div class="revision-actions">
+          <button class="btn btn-primary small" data-revision-done="${item.chapterId}|${item.interval}">Mark Reviewed</button>
+          <button class="btn btn-ghost small" data-revision-open="${item.chapterId}">Open Chapter</button>
+        </div>
+      </article>`
+    )
+    .join("");
+}
+
+function renderRevisionPlanner() {
+  if (!refs.revisionDueList || !refs.revisionUpcomingList) return;
+  const tasks = getRevisionTasks();
+  refs.revisionDueList.innerHTML = renderRevisionItems(tasks.due, "due");
+  refs.revisionUpcomingList.innerHTML = renderRevisionItems(tasks.upcoming, "upcoming");
 }
 
 function applyTheme() {
@@ -1423,13 +1508,22 @@ async function isUrlReachable(url) {
 }
 
 function toggleCompleted(id) {
+  const key = String(id);
   if (state.completed.includes(id)) {
     state.completed = state.completed.filter((item) => item !== id);
+    delete state.completedMeta[key];
+    delete state.revisionLog[key];
   } else {
     state.completed.push(id);
+    if (!state.completedMeta[key]) {
+      state.completedMeta[key] = todayKey();
+    }
   }
   state.completed.sort((a, b) => a - b);
   saveJson(STORAGE_KEYS.completed, state.completed);
+  saveJson(STORAGE_KEYS.completedMeta, state.completedMeta);
+  saveJson(STORAGE_KEYS.revisionLog, state.revisionLog);
+  renderRevisionPlanner();
 }
 
 function toggleBookmark(id) {
@@ -1527,6 +1621,28 @@ function bindGlobalEvents() {
     renderCompanySheets();
   });
 
+  document.getElementById("revisionPlanner")?.addEventListener("click", (event) => {
+    const doneBtn = event.target.closest("[data-revision-done]");
+    if (doneBtn) {
+      const [chapterId, interval] = (doneBtn.getAttribute("data-revision-done") || "").split("|");
+      if (!chapterId || !interval) return;
+      const chapterKey = String(chapterId);
+      if (!state.revisionLog[chapterKey]) state.revisionLog[chapterKey] = {};
+      state.revisionLog[chapterKey][String(interval)] = todayKey();
+      saveJson(STORAGE_KEYS.revisionLog, state.revisionLog);
+      renderRevisionPlanner();
+      return;
+    }
+
+    const openBtn = event.target.closest("[data-revision-open]");
+    if (openBtn) {
+      const chapterId = Number(openBtn.getAttribute("data-revision-open"));
+      if (!chapterId) return;
+      renderChapter(chapterId);
+      document.getElementById("chapters")?.scrollIntoView({ behavior: "smooth" });
+    }
+  });
+
   refs.chapterSearch.addEventListener("input", () => {
     renderNav(refs.chapterSearch.value);
   });
@@ -1610,9 +1726,11 @@ function init() {
   applyTheme();
   initStreak();
   initGoal();
+  saveJson(STORAGE_KEYS.completedMeta, state.completedMeta);
   renderRoadmap();
   renderRolePaths();
   renderCompanySheets();
+  renderRevisionPlanner();
   renderPhaseControls();
   renderNav();
   renderBookmarks();
