@@ -1,0 +1,182 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Master Data Structures and Algorithms from beginner to advanced with a complete chapter-wise 2026 interview-ready roadmap." />
+  <meta name="keywords" content="DSA, Data Structures, Algorithms, Interview Preparation, LeetCode, Coding Roadmap" />
+  <meta name="author" content="Master DSA 2026" />
+  <title>Master DSA 2026 | Interactive Book-Style Learning Platform</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="reading-progress-wrap" aria-hidden="true">
+    <div id="readingProgressBar" class="reading-progress-bar"></div>
+  </div>
+
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-mark" aria-hidden="true">DSA</div>
+      <div>
+        <p class="brand-title">Master DSA 2026</p>
+        <p class="brand-sub">Beginner to Interview Mastery</p>
+      </div>
+    </div>
+
+    <div class="topbar-actions">
+      <label class="search-shell" for="chapterSearch">
+        <span aria-hidden="true">🔎</span>
+        <input id="chapterSearch" type="search" placeholder="Search chapters, topics, patterns..." autocomplete="off" />
+      </label>
+      <button id="themeToggle" class="icon-btn" aria-label="Toggle dark mode">🌙</button>
+      <button id="mobileNavToggle" class="icon-btn mobile-only" aria-label="Toggle sidebar">☰</button>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside id="sidebar" class="sidebar" aria-label="Chapter navigation">
+      <div class="sidebar-head">
+        <h2>Book Contents</h2>
+        <p id="sidebarMeta">35 Chapters • ~180 Hours</p>
+      </div>
+
+      <div class="phase-controls" id="phaseControls"></div>
+
+      <nav id="chapterNav" class="chapter-nav"></nav>
+
+      <div class="sidebar-footer">
+        <h3>Bookmarks</h3>
+        <ul id="bookmarkList" class="bookmark-list"></ul>
+      </div>
+    </aside>
+
+    <main class="main-content" id="mainContent">
+      <section class="hero section" id="home">
+        <div class="hero-copy">
+          <p class="eyebrow">Interactive Textbook + Coding Academy</p>
+          <h1>Master DSA 2026</h1>
+          <p>
+            A complete chapter-wise journey from zero to interview-ready. Learn the right theory,
+            coding patterns, complexity thinking, and problem-solving discipline used in modern tech interviews.
+          </p>
+          <div class="hero-actions">
+            <a href="#chapters" class="btn btn-primary" id="startLearningBtn">Start Learning</a>
+            <button class="btn btn-ghost" id="randomChapterBtn">Open Random Chapter</button>
+          </div>
+          <div class="hero-stats">
+            <article>
+              <h3 id="totalChaptersStat">35</h3>
+              <p>Total Chapters</p>
+            </article>
+            <article>
+              <h3>16 Weeks</h3>
+              <p>Estimated Duration</p>
+            </article>
+            <article>
+              <h3>12+</h3>
+              <p>Interview Skills Gained</p>
+            </article>
+          </div>
+        </div>
+
+        <div class="timeline-card" aria-label="Roadmap timeline">
+          <h2>Roadmap Timeline</h2>
+          <ol>
+            <li><span>Weeks 1-4</span> Beginner Foundations</li>
+            <li><span>Weeks 5-8</span> Intermediate Structures</li>
+            <li><span>Weeks 9-12</span> Advanced Algorithms</li>
+            <li><span>Weeks 13-16</span> Interview Mastery</li>
+          </ol>
+        </div>
+      </section>
+
+      <section class="dashboard section" id="dashboard">
+        <div class="section-head">
+          <h2>Learning Dashboard</h2>
+          <p>Track progress, consistency, and daily practice goals.</p>
+        </div>
+
+        <div class="dashboard-grid">
+          <article class="panel metric">
+            <h3>Chapters Completed</h3>
+            <p id="completedMetric" class="metric-value">0 / 35</p>
+          </article>
+          <article class="panel metric">
+            <h3>Total Progress</h3>
+            <p id="progressMetric" class="metric-value">0%</p>
+          </article>
+          <article class="panel metric">
+            <h3>Time Spent Estimate</h3>
+            <p id="timeMetric" class="metric-value">0h</p>
+          </article>
+          <article class="panel metric">
+            <h3>Current Phase</h3>
+            <p id="phaseMetric" class="metric-value">Beginner</p>
+          </article>
+        </div>
+
+        <div class="dashboard-grid secondary">
+          <article class="panel">
+            <h3>Motivational Streak</h3>
+            <p id="streakValue" class="big-inline">🔥 1 day</p>
+            <p class="muted">Open and progress daily to keep your streak alive.</p>
+          </article>
+
+          <article class="panel">
+            <h3>Daily Goal Tracker</h3>
+            <label for="dailyGoalInput" class="muted">Problems target for today</label>
+            <div class="goal-row">
+              <input id="dailyGoalInput" type="number" min="1" max="20" value="2" />
+              <button id="saveGoalBtn" class="btn btn-primary small">Save Goal</button>
+            </div>
+            <div class="goal-row">
+              <button id="minusSolvedBtn" class="btn btn-ghost small">-1 Solved</button>
+              <p id="solvedTodayText" class="muted">Solved today: 0 / 2</p>
+              <button id="plusSolvedBtn" class="btn btn-ghost small">+1 Solved</button>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="roadmap section" id="roadmap">
+        <div class="section-head">
+          <h2>4-Phase Roadmap</h2>
+          <p>A practical curriculum designed for freshers and 2026 interview preparation.</p>
+        </div>
+        <div id="roadmapGrid" class="roadmap-grid"></div>
+      </section>
+
+      <section class="chapters section" id="chapters">
+        <div class="section-head">
+          <h2>Chapter-Wise Learning Portal</h2>
+          <p>Open any chapter to study complete notes, code examples, quiz, and interview guidance.</p>
+        </div>
+
+        <article id="chapterContent" class="chapter-content panel" aria-live="polite"></article>
+      </section>
+
+      <section class="notes section" id="notes">
+        <div class="section-head">
+          <h2>Notes Section</h2>
+          <p>Write your chapter observations, revision points, and interview takeaways.</p>
+        </div>
+        <article class="panel notes-panel">
+          <label for="notesArea">Personal learning notes (saved in browser)</label>
+          <textarea id="notesArea" rows="8" placeholder="Example: In Binary Search, always define search space and loop invariant..."></textarea>
+          <div class="notes-actions">
+            <button id="saveNotesBtn" class="btn btn-primary">Save Notes</button>
+            <button id="clearNotesBtn" class="btn btn-ghost">Clear Notes</button>
+            <p id="notesStatus" class="muted"></p>
+          </div>
+        </article>
+      </section>
+
+      <footer class="footer">
+        <p>Master DSA 2026 • Static GitHub Pages Ready • Built with HTML, CSS, and Vanilla JavaScript</p>
+      </footer>
+    </main>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
