@@ -844,6 +844,106 @@ body {
   flex-wrap: wrap;
 }
 
+.bridge-grid,
+.booster-grid {
+  display: grid;
+  gap: 0.8rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.bridge-card,
+.booster-card {
+  background: var(--bg-elev);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 0.9rem;
+  box-shadow: var(--shadow);
+}
+
+.bridge-card h3,
+.booster-card h3,
+.bridge-card p,
+.booster-card p {
+  margin: 0;
+}
+
+.bridge-meta,
+.booster-meta {
+  margin-top: 0.35rem;
+  color: var(--muted);
+}
+
+.bridge-tags {
+  margin-top: 0.5rem;
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+
+.bridge-tag {
+  font-size: 0.76rem;
+  font-weight: 700;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 0.2rem 0.5rem;
+  background: color-mix(in srgb, var(--primary) 10%, transparent);
+}
+
+.booster-code {
+  margin-top: 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 0.6rem;
+  background: color-mix(in srgb, var(--primary) 6%, transparent);
+  font-family: "Consolas", "Cascadia Mono", monospace;
+  font-size: 0.82rem;
+  white-space: pre-wrap;
+  color: var(--text);
+}
+
+.pack-grid {
+  display: grid;
+  gap: 0.8rem;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.pack-list {
+  margin-top: 0.5rem;
+  display: grid;
+  gap: 0.55rem;
+}
+
+.pack-item {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 0.6rem;
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
+}
+
+.pack-item p {
+  margin: 0;
+}
+
+.export-actions {
+  display: flex;
+  gap: 0.55rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.file-label {
+  cursor: pointer;
+}
+
+#importProgressInput {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+}
+
 .phase-card {
   background: var(--bg-elev);
   border: 1px solid var(--border);
@@ -1178,6 +1278,12 @@ pre {
   .template-grid {
     grid-template-columns: 1fr;
   }
+
+  .bridge-grid,
+  .booster-grid,
+  .pack-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 720px) {
@@ -1213,6 +1319,9 @@ pre {
   .company-sheet-grid,
   .revision-grid,
   .template-grid,
+  .bridge-grid,
+  .booster-grid,
+  .pack-grid,
   .hero-stats {
     grid-template-columns: 1fr;
   }

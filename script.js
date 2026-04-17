@@ -234,6 +234,93 @@ const COMMUNICATION_TEMPLATES = [
   }
 ];
 
+const PROJECT_DSA_BRIDGE = [
+  {
+    feature: "API Response Caching",
+    concept: "Hash Map + LRU (Linked List + Hashing)",
+    impact: "Reduces repeated DB fetch latency from O(query cost) to near O(1) cache hits.",
+    tags: ["Hashing", "Linked List", "Design"]
+  },
+  {
+    feature: "Global Search Suggestions",
+    concept: "Trie + Prefix Matching",
+    impact: "Fast prefix query with scalable autocomplete behavior for large vocabularies.",
+    tags: ["Trie", "Strings", "Prefix"]
+  },
+  {
+    feature: "Background Job Processing",
+    concept: "Queue + Priority Queue",
+    impact: "Ensures ordered and priority-based execution of asynchronous workloads.",
+    tags: ["Queue", "Heap", "Scheduling"]
+  },
+  {
+    feature: "Social/Network Connections",
+    concept: "Graph Traversal (BFS/DFS)",
+    impact: "Models recommendation hops, reachability, and shortest interaction paths.",
+    tags: ["Graph", "BFS", "DFS"]
+  },
+  {
+    feature: "Rate Limiting Gateway",
+    concept: "Sliding Window + Hash Map",
+    impact: "Controls request burst safely in O(1) amortized per request.",
+    tags: ["Sliding Window", "Hashing", "System Design"]
+  },
+  {
+    feature: "Analytics Range Dashboards",
+    concept: "Prefix Sum / Segment Tree",
+    impact: "Turns repeated range queries from O(n) scans to O(1) or O(log n).",
+    tags: ["Prefix Sum", "Segment Tree", "Optimization"]
+  }
+];
+
+const EXPERIENCE_BOOSTERS = [
+  {
+    title: "Nested Loop Duplicate Check",
+    before: "for each i -> for each j>i compare arr[i]==arr[j]  // O(n^2)",
+    after: "use hash set membership while scanning once             // O(n)",
+    benchmark: "Example: 100k items, from ~seconds to milliseconds in typical scenarios."
+  },
+  {
+    title: "Repeated Subarray Sum Queries",
+    before: "compute sum(L..R) by scanning each query               // O(q*n)",
+    after: "build prefix sum once, each query O(1)                 // O(n+q)",
+    benchmark: "Large dashboards get predictable query latency."
+  },
+  {
+    title: "Top-K Leaderboard",
+    before: "sort full list every update                            // O(n log n)",
+    after: "maintain min/max heap of size k                        // O(n log k)",
+    benchmark: "Faster updates when k << n."
+  },
+  {
+    title: "Dynamic Connectivity Checks",
+    before: "run DFS/BFS from scratch for each query                // O(q*(V+E))",
+    after: "Union-Find with path compression                        // near O(q)",
+    benchmark: "Excellent for repeated connectivity queries."
+  }
+];
+
+const STAR_EXAMPLES = [
+  "Situation: Payment API timeout spikes. Task: reduce failure rate. Action: introduced queue retry + idempotency keys. Result: failure rate dropped 42%.",
+  "Situation: Search felt slow on catalog growth. Task: improve discoverability speed. Action: added trie-backed prefix suggestions + cache. Result: autocomplete response improved from ~280ms to ~60ms.",
+  "Situation: Legacy report generation blocked release. Task: optimize without changing business logic. Action: replaced nested scans with hashmap aggregation. Result: runtime reduced ~8x."
+];
+
+const RESUME_BULLETS = [
+  "Optimized frequent lookup pipeline using hash-based caching, reducing average API latency by 35%.",
+  "Implemented queue-driven background processing for async jobs, improving throughput and reliability under load.",
+  "Refactored reporting logic from O(n^2) to O(n log n), cutting execution time from minutes to seconds.",
+  "Built DSA-driven feature prototypes (trie search, graph traversal) to improve product responsiveness."
+];
+
+const RECRUITER_CHECKLIST = [
+  "Resume shows measurable impact (%, latency, throughput, cost).",
+  "Projects have ownership clarity: what you built vs team.",
+  "Interview stories cover problem, approach, trade-off, result.",
+  "Core DSA patterns are visible in project decisions.",
+  "Communication is structured: baseline -> optimize -> verify."
+];
+
 const chapters = [
   {
     id: 1,
@@ -871,6 +958,14 @@ const refs = {
   mockResult: document.getElementById("mockResult"),
   templateGrid: document.getElementById("templateGrid"),
   templateStatus: document.getElementById("templateStatus"),
+  bridgeGrid: document.getElementById("bridgeGrid"),
+  boosterGrid: document.getElementById("boosterGrid"),
+  starList: document.getElementById("starList"),
+  resumeBulletList: document.getElementById("resumeBulletList"),
+  recruiterChecklist: document.getElementById("recruiterChecklist"),
+  downloadProgressBtn: document.getElementById("downloadProgressBtn"),
+  importProgressInput: document.getElementById("importProgressInput"),
+  importStatus: document.getElementById("importStatus"),
   notesArea: document.getElementById("notesArea"),
   notesStatus: document.getElementById("notesStatus"),
   saveNotesBtn: document.getElementById("saveNotesBtn"),
@@ -1342,6 +1437,140 @@ function renderCommunicationTemplates() {
   if (refs.templateStatus) {
     refs.templateStatus.textContent = "Tip: read these scripts aloud during mock practice to build confident communication flow.";
   }
+}
+
+function renderProjectBridge() {
+  if (!refs.bridgeGrid) return;
+  refs.bridgeGrid.innerHTML = PROJECT_DSA_BRIDGE.map(
+    (item) => `
+      <article class="bridge-card fade-in">
+        <h3>${item.feature}</h3>
+        <p class="bridge-meta"><strong>DSA Concept:</strong> ${item.concept}</p>
+        <p class="bridge-meta"><strong>Engineering Impact:</strong> ${item.impact}</p>
+        <div class="bridge-tags">
+          ${item.tags.map((tag) => `<span class="bridge-tag">${tag}</span>`).join("")}
+        </div>
+      </article>`
+  ).join("");
+}
+
+function renderExperienceBooster() {
+  if (!refs.boosterGrid) return;
+  refs.boosterGrid.innerHTML = EXPERIENCE_BOOSTERS.map(
+    (item) => `
+      <article class="booster-card fade-in">
+        <h3>${item.title}</h3>
+        <p class="booster-meta"><strong>Before</strong></p>
+        <div class="booster-code">${item.before}</div>
+        <p class="booster-meta"><strong>After</strong></p>
+        <div class="booster-code">${item.after}</div>
+        <p class="booster-meta"><strong>Benchmark:</strong> ${item.benchmark}</p>
+      </article>`
+  ).join("");
+}
+
+function renderBehavioralPack() {
+  if (refs.starList) {
+    refs.starList.innerHTML = STAR_EXAMPLES.map((item) => `<article class="pack-item"><p>${item}</p></article>`).join("");
+  }
+  if (refs.resumeBulletList) {
+    refs.resumeBulletList.innerHTML = RESUME_BULLETS.map((item) => `<article class="pack-item"><p>${item}</p></article>`).join("");
+  }
+  if (refs.recruiterChecklist) {
+    refs.recruiterChecklist.innerHTML = RECRUITER_CHECKLIST.map((item) => `<article class="pack-item"><p>${item}</p></article>`).join("");
+  }
+}
+
+function buildExportPayload() {
+  return {
+    app: "Master DSA 2026",
+    version: "1.0",
+    exportedAt: new Date().toISOString(),
+    data: {
+      theme: state.theme,
+      completed: state.completed,
+      bookmarks: state.bookmarks,
+      currentChapter: state.currentChapter,
+      notes: state.notes,
+      phaseState: state.phaseState,
+      goal: state.goal,
+      streak: state.streak,
+      trackMode: state.trackMode,
+      companyFilter: state.companyFilter,
+      completedMeta: state.completedMeta,
+      revisionLog: state.revisionLog,
+      mockHistory: state.mockHistory
+    }
+  };
+}
+
+function persistAllState() {
+  localStorage.setItem(STORAGE_KEYS.theme, state.theme);
+  saveJson(STORAGE_KEYS.completed, state.completed);
+  saveJson(STORAGE_KEYS.bookmarks, state.bookmarks);
+  localStorage.setItem(STORAGE_KEYS.current, String(state.currentChapter));
+  saveJson(STORAGE_KEYS.notes, state.notes);
+  saveJson(STORAGE_KEYS.phases, state.phaseState);
+  saveJson(STORAGE_KEYS.goal, state.goal);
+  saveJson(STORAGE_KEYS.streak, state.streak);
+  localStorage.setItem(STORAGE_KEYS.trackMode, state.trackMode);
+  localStorage.setItem(STORAGE_KEYS.companyFilter, state.companyFilter);
+  saveJson(STORAGE_KEYS.completedMeta, state.completedMeta);
+  saveJson(STORAGE_KEYS.revisionLog, state.revisionLog);
+  saveJson(STORAGE_KEYS.mockHistory, state.mockHistory);
+}
+
+function applyImportedProgress(payload) {
+  const imported = payload?.data;
+  if (!imported || typeof imported !== "object") {
+    throw new Error("Invalid JSON format: missing data object.");
+  }
+
+  state.theme = imported.theme === "dark" ? "dark" : "light";
+  state.completed = Array.isArray(imported.completed) ? imported.completed.filter((n) => Number.isInteger(n) && n >= 1 && n <= chapters.length) : [];
+  state.bookmarks = Array.isArray(imported.bookmarks) ? imported.bookmarks.filter((n) => Number.isInteger(n) && n >= 1 && n <= chapters.length) : [];
+  state.currentChapter = Number.isInteger(imported.currentChapter) && imported.currentChapter >= 1 && imported.currentChapter <= chapters.length ? imported.currentChapter : 1;
+  state.notes = imported.notes && typeof imported.notes === "object" ? imported.notes : {};
+  state.phaseState = imported.phaseState && typeof imported.phaseState === "object" ? imported.phaseState : state.phaseState;
+  state.goal = imported.goal && typeof imported.goal === "object" ? imported.goal : state.goal;
+  state.streak = imported.streak && typeof imported.streak === "object" ? imported.streak : state.streak;
+  state.trackMode = imported.trackMode === "experienced" ? "experienced" : "fresher";
+  state.companyFilter = ["all", "service", "product"].includes(imported.companyFilter) ? imported.companyFilter : "all";
+  state.completedMeta = imported.completedMeta && typeof imported.completedMeta === "object" ? imported.completedMeta : {};
+  state.revisionLog = imported.revisionLog && typeof imported.revisionLog === "object" ? imported.revisionLog : {};
+  state.mockHistory = Array.isArray(imported.mockHistory) ? imported.mockHistory.slice(0, 8) : [];
+
+  state.completed.forEach((id) => {
+    const key = String(id);
+    if (!state.completedMeta[key]) state.completedMeta[key] = todayKey();
+  });
+  state.phaseState = {
+    Beginner: state.phaseState.Beginner ?? true,
+    Intermediate: state.phaseState.Intermediate ?? false,
+    Advanced: state.phaseState.Advanced ?? false,
+    "Interview Mastery": state.phaseState["Interview Mastery"] ?? false
+  };
+  enforceSingleExpandedPhase();
+
+  state.completed.sort((a, b) => a - b);
+  state.bookmarks.sort((a, b) => a - b);
+  persistAllState();
+
+  applyTheme();
+  renderRoadmap();
+  renderRolePaths();
+  renderCompanySheets();
+  renderRevisionPlanner();
+  renderCommunicationTemplates();
+  renderProjectBridge();
+  renderExperienceBooster();
+  renderBehavioralPack();
+  renderPhaseControls();
+  renderNav(refs.chapterSearch.value);
+  renderBookmarks();
+  renderChapter(state.currentChapter);
+  initGoal();
+  updateDashboard();
 }
 
 function renderRoadmap() {
@@ -1910,6 +2139,35 @@ function bindGlobalEvents() {
     }
   });
 
+  refs.downloadProgressBtn?.addEventListener("click", () => {
+    const payload = buildExportPayload();
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `master-dsa-progress-${todayKey()}.json`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    if (refs.importStatus) refs.importStatus.textContent = "Progress exported successfully.";
+  });
+
+  refs.importProgressInput?.addEventListener("change", async (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    try {
+      const text = await file.text();
+      const parsed = JSON.parse(text);
+      applyImportedProgress(parsed);
+      if (refs.importStatus) refs.importStatus.textContent = "Progress imported successfully.";
+    } catch (error) {
+      if (refs.importStatus) refs.importStatus.textContent = `Import failed: ${error.message}`;
+    } finally {
+      refs.importProgressInput.value = "";
+    }
+  });
+
   refs.chapterSearch.addEventListener("input", () => {
     renderNav(refs.chapterSearch.value);
   });
@@ -1999,6 +2257,9 @@ function init() {
   renderCompanySheets();
   renderRevisionPlanner();
   renderCommunicationTemplates();
+  renderProjectBridge();
+  renderExperienceBooster();
+  renderBehavioralPack();
   renderPhaseControls();
   renderNav();
   renderBookmarks();
