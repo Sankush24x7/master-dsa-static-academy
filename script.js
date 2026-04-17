@@ -10,7 +10,8 @@
   trackMode: "dsa_track_mode",
   companyFilter: "dsa_company_filter",
   completedMeta: "dsa_completed_meta",
-  revisionLog: "dsa_revision_log"
+  revisionLog: "dsa_revision_log",
+  mockHistory: "dsa_mock_history"
 };
 
 const roadmapPhasesByTrack = {
@@ -814,6 +815,15 @@ const refs = {
   companySheetGrid: document.getElementById("companySheetGrid"),
   revisionDueList: document.getElementById("revisionDueList"),
   revisionUpcomingList: document.getElementById("revisionUpcomingList"),
+  mockModeSelect: document.getElementById("mockModeSelect"),
+  mockDurationInput: document.getElementById("mockDurationInput"),
+  startMockBtn: document.getElementById("startMockBtn"),
+  submitMockBtn: document.getElementById("submitMockBtn"),
+  retakeMockBtn: document.getElementById("retakeMockBtn"),
+  mockStatus: document.getElementById("mockStatus"),
+  mockTimer: document.getElementById("mockTimer"),
+  mockQuestions: document.getElementById("mockQuestions"),
+  mockResult: document.getElementById("mockResult"),
   notesArea: document.getElementById("notesArea"),
   notesStatus: document.getElementById("notesStatus"),
   saveNotesBtn: document.getElementById("saveNotesBtn"),
@@ -843,6 +853,7 @@ let state = {
   companyFilter: localStorage.getItem(STORAGE_KEYS.companyFilter) || "all",
   completedMeta: readJson(STORAGE_KEYS.completedMeta, {}),
   revisionLog: readJson(STORAGE_KEYS.revisionLog, {}),
+  mockHistory: readJson(STORAGE_KEYS.mockHistory, []),
   goal: readJson(STORAGE_KEYS.goal, { date: todayKey(), target: 2, solved: 0 }),
   streak: readJson(STORAGE_KEYS.streak, { lastDate: todayKey(), count: 1 })
 };
@@ -859,6 +870,9 @@ state.completed.forEach((chapterId) => {
     state.completedMeta[key] = todayKey();
   }
 });
+
+let mockSession = null;
+let mockTimerHandle = null;
 
 // Normalize phase defaults so fresh users see only Beginner expanded.
 state.phaseState = {
@@ -959,6 +973,156 @@ function renderRevisionPlanner() {
   refs.revisionUpcomingList.innerHTML = renderRevisionItems(tasks.upcoming, "upcoming");
 }
 
+function shuffleArray(list) {
+  const arr = [...list];
+  for (let i = arr.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+function getMockPool(mode) {
+  if (mode === "experienced") {
+    return chapters.filter((c) => c.id >= 11);
+  }
+  return chapters.filter((c) => c.id <= 25);
+}
+
+function resetMockTimer() {
+  if (mockTimerHandle) {
+    clearInterval(mockTimerHandle);
+    mockTimerHandle = null;
+  }
+}
+
+function formatTimer(seconds) {
+  const mins = String(Math.floor(seconds / 60)).padStart(2, "0");
+  const secs = String(seconds % 60).padStart(2, "0");
+  return `${mins}:${secs}`;
+}
+
+function renderMockQuestions() {
+  if (!refs.mockQuestions || !mockSession) return;
+  refs.mockQuestions.innerHTML = mockSession.questions
+    .map(
+      (q, idx) => `
+      <article class="mock-q">
+        <p class="q-title">Q${idx + 1}. (${q.chapter.phase}) ${q.quiz.q}</p>
+        <p class="meta">From Chapter ${q.chapter.id}: ${q.chapter.title}</p>
+        <div class="mock-options">
+          ${q.quiz.options
+            .map(
+              (opt, optIdx) =>
+                `<button class="mock-option ${q.userAnswer === optIdx ? "selected" : ""}" data-mock-q="${idx}" data-mock-opt="${optIdx}">${opt}</button>`
+            )
+            .join("")}
+        </div>
+      </article>`
+    )
+    .join("");
+}
+
+function startMockTimer() {
+  if (!mockSession || !refs.mockTimer) return;
+  resetMockTimer();
+  refs.mockTimer.textContent = formatTimer(mockSession.remainingSeconds);
+  mockTimerHandle = setInterval(() => {
+    if (!mockSession) {
+      resetMockTimer();
+      return;
+    }
+    mockSession.remainingSeconds -= 1;
+    refs.mockTimer.textContent = formatTimer(Math.max(0, mockSession.remainingSeconds));
+    if (mockSession.remainingSeconds <= 0) {
+      submitMockTest(true);
+    }
+  }, 1000);
+}
+
+function startMockTest() {
+  if (!refs.mockModeSelect || !refs.mockDurationInput) return;
+  const mode = refs.mockModeSelect.value === "experienced" ? "experienced" : "fresher";
+  const duration = Math.max(5, Math.min(90, Number(refs.mockDurationInput.value) || 20));
+  const selected = shuffleArray(getMockPool(mode)).slice(0, 10);
+  if (!selected.length) return;
+
+  mockSession = {
+    mode,
+    duration,
+    startedAt: todayKey(),
+    remainingSeconds: duration * 60,
+    questions: selected.map((chapter) => ({
+      chapter,
+      quiz: chapter.quiz,
+      userAnswer: null
+    }))
+  };
+
+  refs.mockStatus.textContent = `Mock started (${mode === "experienced" ? "Experienced OA" : "Fresher OA"}) - ${duration} minutes - 10 questions.`;
+  refs.submitMockBtn.disabled = false;
+  refs.retakeMockBtn.disabled = false;
+  refs.mockResult.innerHTML = "";
+  renderMockQuestions();
+  startMockTimer();
+}
+
+function submitMockTest(autoSubmit = false) {
+  if (!mockSession) return;
+  resetMockTimer();
+
+  const total = mockSession.questions.length;
+  let correct = 0;
+  const wrongByChapter = {};
+  const wrongByPhase = {};
+
+  mockSession.questions.forEach((q) => {
+    if (q.userAnswer === q.quiz.answer) {
+      correct += 1;
+    } else {
+      wrongByChapter[q.chapter.title] = (wrongByChapter[q.chapter.title] || 0) + 1;
+      wrongByPhase[q.chapter.phase] = (wrongByPhase[q.chapter.phase] || 0) + 1;
+    }
+  });
+
+  const scorePct = Math.round((correct / total) * 100);
+  const weakTopics = Object.entries(wrongByChapter)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 4)
+    .map(([name]) => name);
+  const weakPhases = Object.entries(wrongByPhase)
+    .sort((a, b) => b[1] - a[1])
+    .map(([phase, count]) => `${phase} (${count})`)
+    .join(", ");
+
+  const result = {
+    date: todayKey(),
+    mode: mockSession.mode,
+    duration: mockSession.duration,
+    correct,
+    total,
+    scorePct,
+    weakTopics
+  };
+
+  state.mockHistory.unshift(result);
+  state.mockHistory = state.mockHistory.slice(0, 8);
+  saveJson(STORAGE_KEYS.mockHistory, state.mockHistory);
+
+  refs.mockResult.innerHTML = `
+    <article class="mock-result-card">
+      <p class="title">Score: ${correct}/${total} (${scorePct}%) ${autoSubmit ? "- Auto submitted on timer end." : ""}</p>
+      <p class="meta">Weak topics: ${weakTopics.length ? weakTopics.join(", ") : "None - strong attempt."}</p>
+      <p class="meta">Weak phases: ${weakPhases || "None"}</p>
+      <p class="meta">Tip: Revise wrong topics from chapter pages and retry mock after 24 hours.</p>
+    </article>
+  `;
+
+  refs.submitMockBtn.disabled = true;
+  refs.mockStatus.textContent = "Mock submitted. Review weak topics and schedule revision.";
+  mockSession = null;
+}
+
 function applyTheme() {
   refs.body.classList.toggle("dark", state.theme === "dark");
   refs.themeToggle.textContent = state.theme === "dark" ? "\u2600" : "\u263D";
@@ -1030,6 +1194,7 @@ function renderTrackModeUI() {
   });
   refs.trackHint.textContent = TRACK_HINTS[state.trackMode];
   refs.durationStat.textContent = getTrackDurationLabel();
+  if (refs.mockModeSelect) refs.mockModeSelect.value = state.trackMode;
 }
 
 function setTrackMode(mode) {
@@ -1641,6 +1806,28 @@ function bindGlobalEvents() {
       renderChapter(chapterId);
       document.getElementById("chapters")?.scrollIntoView({ behavior: "smooth" });
     }
+  });
+
+  refs.startMockBtn?.addEventListener("click", () => {
+    startMockTest();
+  });
+
+  refs.submitMockBtn?.addEventListener("click", () => {
+    submitMockTest(false);
+  });
+
+  refs.retakeMockBtn?.addEventListener("click", () => {
+    startMockTest();
+  });
+
+  refs.mockQuestions?.addEventListener("click", (event) => {
+    const optionBtn = event.target.closest("[data-mock-q][data-mock-opt]");
+    if (!optionBtn || !mockSession) return;
+    const qIndex = Number(optionBtn.getAttribute("data-mock-q"));
+    const optIndex = Number(optionBtn.getAttribute("data-mock-opt"));
+    if (Number.isNaN(qIndex) || Number.isNaN(optIndex) || !mockSession.questions[qIndex]) return;
+    mockSession.questions[qIndex].userAnswer = optIndex;
+    renderMockQuestions();
   });
 
   refs.chapterSearch.addEventListener("input", () => {

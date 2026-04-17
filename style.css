@@ -709,6 +709,99 @@ body {
   flex-wrap: wrap;
 }
 
+.mock-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  flex-wrap: wrap;
+}
+
+.mock-controls select,
+.mock-controls input {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: transparent;
+  color: var(--text);
+  padding: 0.45rem 0.55rem;
+  font: inherit;
+}
+
+.mock-header {
+  margin-top: 0.8rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.8rem;
+  flex-wrap: wrap;
+}
+
+.mock-timer {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--primary);
+}
+
+.mock-questions {
+  margin-top: 0.8rem;
+  display: grid;
+  gap: 0.65rem;
+}
+
+.mock-q {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 0.65rem;
+  background: color-mix(in srgb, var(--primary) 4%, transparent);
+}
+
+.mock-q p {
+  margin: 0;
+}
+
+.mock-q .q-title {
+  font-weight: 700;
+}
+
+.mock-options {
+  margin-top: 0.45rem;
+  display: grid;
+  gap: 0.35rem;
+}
+
+.mock-option {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 0.45rem 0.6rem;
+  background: transparent;
+  color: var(--text);
+  cursor: pointer;
+  text-align: left;
+}
+
+.mock-option.selected {
+  border-color: color-mix(in srgb, var(--primary) 55%, var(--border));
+  background: color-mix(in srgb, var(--primary) 12%, transparent);
+}
+
+.mock-actions {
+  margin-top: 0.75rem;
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.mock-result {
+  margin-top: 0.8rem;
+}
+
+.mock-result-card {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 0.75rem;
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
+}
+
 .phase-card {
   background: var(--bg-elev);
   border: 1px solid var(--border);
@@ -1034,6 +1127,10 @@ pre {
 
   .revision-grid {
     grid-template-columns: 1fr;
+  }
+
+  .mock-controls {
+    align-items: stretch;
   }
 }
 
