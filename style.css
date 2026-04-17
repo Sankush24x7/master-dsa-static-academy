@@ -539,6 +539,43 @@ body {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
+.role-path-grid {
+  display: grid;
+  gap: 0.8rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.role-path-card {
+  background: var(--bg-elev);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 1rem;
+  box-shadow: var(--shadow);
+}
+
+.role-path-card h3,
+.role-path-card p {
+  margin: 0;
+}
+
+.role-path-meta {
+  margin: 0.4rem 0;
+  color: var(--muted);
+}
+
+.role-path-card ul {
+  margin: 0.45rem 0 0;
+  padding-left: 1.1rem;
+  color: var(--muted);
+}
+
+.role-path-actions {
+  margin-top: 0.75rem;
+  display: flex;
+  gap: 0.45rem;
+  flex-wrap: wrap;
+}
+
 .phase-card {
   background: var(--bg-elev);
   border: 1px solid var(--border);
@@ -853,6 +890,10 @@ pre {
   .source-links {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+
+  .role-path-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 720px) {
@@ -884,6 +925,7 @@ pre {
   .dashboard-grid,
   .dashboard-grid.secondary,
   .roadmap-grid,
+  .role-path-grid,
   .hero-stats {
     grid-template-columns: 1fr;
   }

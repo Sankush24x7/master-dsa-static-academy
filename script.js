@@ -71,6 +71,57 @@ const TRACK_HINTS = {
   experienced: "Experienced Fast-Track: compress fundamentals and focus on advanced interview execution."
 };
 
+const ROLE_PATHS = [
+  {
+    id: "fresher-campus",
+    title: "Fresher Campus Placement Path",
+    mode: "fresher",
+    startChapter: 1,
+    duration: "16 Weeks",
+    points: [
+      "Start with foundations and chapter-by-chapter progression.",
+      "Solve daily beginner/intermediate pattern sets.",
+      "Finish with OA simulation and mock interview practice."
+    ]
+  },
+  {
+    id: "fresher-internship",
+    title: "Fresher Internship Fast Start",
+    mode: "fresher",
+    startChapter: 8,
+    duration: "10 Weeks",
+    points: [
+      "Prioritize arrays, strings, binary search, and hashing.",
+      "Build confidence with 40-60 frequently asked problems.",
+      "Use mock rounds to improve communication and speed."
+    ]
+  },
+  {
+    id: "experienced-refresh",
+    title: "Experienced DSA Refresh Path",
+    mode: "experienced",
+    startChapter: 14,
+    duration: "8 Weeks",
+    points: [
+      "Skip basic onboarding and refresh high-impact patterns.",
+      "Focus on graph, DP, and optimization-heavy rounds.",
+      "Use interview mastery chapters for final polishing."
+    ]
+  },
+  {
+    id: "experienced-system-design-bridge",
+    title: "Experienced + System Design Bridge",
+    mode: "experienced",
+    startChapter: 21,
+    duration: "8-10 Weeks",
+    points: [
+      "Pair advanced DSA with architecture trade-off thinking.",
+      "Practice shortest path, DSU, and advanced DP reasoning.",
+      "Convert algorithm decisions into scalable design narratives."
+    ]
+  }
+];
+
 const chapters = [
   {
     id: 1,
@@ -691,6 +742,8 @@ const refs = {
   durationStat: document.getElementById("durationStat"),
   trackModeToggle: document.getElementById("trackModeToggle"),
   trackHint: document.getElementById("trackHint"),
+  rolePathGrid: document.getElementById("rolePathGrid"),
+  rolePathStatus: document.getElementById("rolePathStatus"),
   notesArea: document.getElementById("notesArea"),
   notesStatus: document.getElementById("notesStatus"),
   saveNotesBtn: document.getElementById("saveNotesBtn"),
@@ -822,6 +875,49 @@ function renderTrackModeUI() {
   });
   refs.trackHint.textContent = TRACK_HINTS[state.trackMode];
   refs.durationStat.textContent = getTrackDurationLabel();
+}
+
+function setTrackMode(mode) {
+  if (!["fresher", "experienced"].includes(mode)) return;
+  if (mode === state.trackMode) return;
+  state.trackMode = mode;
+  localStorage.setItem(STORAGE_KEYS.trackMode, mode);
+  renderRoadmap();
+  updateDashboard();
+}
+
+function renderRolePaths() {
+  if (!refs.rolePathGrid) return;
+  refs.rolePathGrid.innerHTML = ROLE_PATHS.map(
+    (path) => `
+      <article class="role-path-card fade-in">
+        <h3>${path.title}</h3>
+        <p class="role-path-meta">Mode: ${path.mode === "fresher" ? "Fresher" : "Experienced"} • Duration: ${path.duration}</p>
+        <ul>
+          ${path.points.map((point) => `<li>${point}</li>`).join("")}
+        </ul>
+        <div class="role-path-actions">
+          <button class="btn btn-primary small" data-role-path="${path.id}" data-action="activate">Activate Path</button>
+          <button class="btn btn-ghost small" data-role-path="${path.id}" data-action="start">Go To Start Chapter</button>
+        </div>
+      </article>`
+  ).join("");
+  if (refs.rolePathStatus && !refs.rolePathStatus.textContent) {
+    refs.rolePathStatus.textContent = "Tip: choose a path to auto-set track mode and jump to the recommended starting chapter.";
+  }
+}
+
+function activateRolePath(pathId, action = "activate") {
+  const selected = ROLE_PATHS.find((p) => p.id === pathId);
+  if (!selected) return;
+  setTrackMode(selected.mode);
+  if (action === "activate" || action === "start") {
+    renderChapter(selected.startChapter);
+    document.getElementById("chapters")?.scrollIntoView({ behavior: "smooth" });
+  }
+  if (refs.rolePathStatus) {
+    refs.rolePathStatus.textContent = `Active path: ${selected.title} • Track: ${selected.mode === "fresher" ? "Fresher" : "Experienced"} • Start Chapter: ${selected.startChapter}`;
+  }
 }
 
 function renderRoadmap() {
@@ -1301,12 +1397,15 @@ function bindGlobalEvents() {
     if (!target) return;
     const mode = target.getAttribute("data-track-mode");
     if (!["fresher", "experienced"].includes(mode)) return;
-    if (mode === state.trackMode) return;
+    setTrackMode(mode);
+  });
 
-    state.trackMode = mode;
-    localStorage.setItem(STORAGE_KEYS.trackMode, mode);
-    renderRoadmap();
-    updateDashboard();
+  refs.rolePathGrid?.addEventListener("click", (event) => {
+    const trigger = event.target.closest("[data-role-path][data-action]");
+    if (!trigger) return;
+    const pathId = trigger.getAttribute("data-role-path");
+    const action = trigger.getAttribute("data-action");
+    activateRolePath(pathId, action);
   });
 
   refs.chapterSearch.addEventListener("input", () => {
@@ -1393,6 +1492,7 @@ function init() {
   initStreak();
   initGoal();
   renderRoadmap();
+  renderRolePaths();
   renderPhaseControls();
   renderNav();
   renderBookmarks();
