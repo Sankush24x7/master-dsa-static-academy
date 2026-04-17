@@ -548,23 +548,32 @@ body {
   display: flex;
   gap: 0.5rem;
   flex-wrap: wrap;
+  align-items: center;
 }
 
 .node {
-  width: 54px;
-  height: 54px;
+  min-width: 92px;
+  min-height: 60px;
+  padding: 0.5rem 0.6rem;
   border-radius: 14px;
   background: linear-gradient(140deg, var(--primary), var(--primary-2));
   color: #fff;
-  display: grid;
-  place-items: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
   font-weight: 800;
+  line-height: 1.15;
+  word-break: break-word;
+  overflow-wrap: anywhere;
 }
 
 .arrow {
   align-self: center;
   color: var(--primary);
   font-weight: 800;
+  font-size: 1rem;
+  padding: 0 0.1rem;
 }
 
 .complexity-table {
