@@ -6,39 +6,70 @@
   notes: "dsa_notes",
   streak: "dsa_streak",
   goal: "dsa_goal",
-  phases: "dsa_phase_state"
+  phases: "dsa_phase_state",
+  trackMode: "dsa_track_mode"
 };
 
-const roadmapPhases = [
-  {
-    id: "Beginner",
-    duration: "4 Weeks",
-    topics: "Complexity basics, arrays, strings, recursion, searching, sorting",
-    goal: "Build mental models for brute force vs optimized solutions",
-    practice: "80 foundational problems"
-  },
-  {
-    id: "Intermediate",
-    duration: "4 Weeks",
-    topics: "Linked structures, trees, heaps, greedy, backtracking",
-    goal: "Design data structures and reason with invariants",
-    practice: "90 mixed-pattern problems"
-  },
-  {
-    id: "Advanced",
-    duration: "4 Weeks",
-    topics: "Graphs, dynamic programming, union-find, segment tree",
-    goal: "Handle high-constraint optimization and graph modeling",
-    practice: "100 advanced interview problems"
-  },
-  {
-    id: "Interview Mastery",
-    duration: "4 Weeks",
-    topics: "Pattern drilling, mock rounds, OA strategy, resume positioning",
-    goal: "Execute under pressure with communication and speed",
-    practice: "Top 100 list + 8 mock interviews"
-  }
-];
+const roadmapPhasesByTrack = {
+  fresher: [
+    {
+      id: "Beginner",
+      duration: "4 Weeks",
+      topics: "Complexity basics, arrays, strings, recursion, searching, sorting",
+      goal: "Build mental models for brute force vs optimized solutions",
+      practice: "80 foundational problems"
+    },
+    {
+      id: "Intermediate",
+      duration: "4 Weeks",
+      topics: "Linked structures, trees, heaps, greedy, backtracking",
+      goal: "Design data structures and reason with invariants",
+      practice: "90 mixed-pattern problems"
+    },
+    {
+      id: "Advanced",
+      duration: "4 Weeks",
+      topics: "Graphs, dynamic programming, union-find, segment tree",
+      goal: "Handle high-constraint optimization and graph modeling",
+      practice: "100 advanced interview problems"
+    },
+    {
+      id: "Interview Mastery",
+      duration: "4 Weeks",
+      topics: "Pattern drilling, mock rounds, OA strategy, resume positioning",
+      goal: "Execute under pressure with communication and speed",
+      practice: "Top 100 list + 8 mock interviews"
+    }
+  ],
+  experienced: [
+    {
+      id: "Intermediate",
+      duration: "2 Weeks",
+      topics: "Linked list, stack/queue, trees/BST, heap, greedy recap",
+      goal: "Refresh implementation speed and core invariants",
+      practice: "70 pattern-focused problems"
+    },
+    {
+      id: "Advanced",
+      duration: "3 Weeks",
+      topics: "Graphs, DP, trie, segment tree, union-find, shortest path",
+      goal: "Rebuild depth for high-constraint and optimization questions",
+      practice: "110 advanced problems"
+    },
+    {
+      id: "Interview Mastery",
+      duration: "3 Weeks",
+      topics: "Top interview sets, OA simulations, mock rounds, storytelling",
+      goal: "Deliver optimized solutions with clear communication under pressure",
+      practice: "Top 150 drills + 10 mocks"
+    }
+  ]
+};
+
+const TRACK_HINTS = {
+  fresher: "Fresher Path: start from fundamentals with a guided 16-week progression.",
+  experienced: "Experienced Fast-Track: compress fundamentals and focus on advanced interview execution."
+};
 
 const chapters = [
   {
@@ -652,9 +683,14 @@ const refs = {
   progressMetric: document.getElementById("progressMetric"),
   timeMetric: document.getElementById("timeMetric"),
   phaseMetric: document.getElementById("phaseMetric"),
+  sidebarMeta: document.getElementById("sidebarMeta"),
   streakValue: document.getElementById("streakValue"),
   bookmarkList: document.getElementById("bookmarkList"),
   roadmapGrid: document.getElementById("roadmapGrid"),
+  roadmapTimeline: document.getElementById("roadmapTimeline"),
+  durationStat: document.getElementById("durationStat"),
+  trackModeToggle: document.getElementById("trackModeToggle"),
+  trackHint: document.getElementById("trackHint"),
   notesArea: document.getElementById("notesArea"),
   notesStatus: document.getElementById("notesStatus"),
   saveNotesBtn: document.getElementById("saveNotesBtn"),
@@ -680,9 +716,14 @@ let state = {
     Advanced: false,
     "Interview Mastery": false
   }),
+  trackMode: localStorage.getItem(STORAGE_KEYS.trackMode) || "fresher",
   goal: readJson(STORAGE_KEYS.goal, { date: todayKey(), target: 2, solved: 0 }),
   streak: readJson(STORAGE_KEYS.streak, { lastDate: todayKey(), count: 1 })
 };
+
+if (!["fresher", "experienced"].includes(state.trackMode)) {
+  state.trackMode = "fresher";
+}
 
 // Normalize phase defaults so fresh users see only Beginner expanded.
 state.phaseState = {
@@ -750,8 +791,42 @@ function syncGoalText() {
   refs.solvedTodayText.textContent = `Solved today: ${state.goal.solved} / ${state.goal.target}`;
 }
 
+function getActiveRoadmapPhases() {
+  return roadmapPhasesByTrack[state.trackMode] || roadmapPhasesByTrack.fresher;
+}
+
+function getTrackDurationLabel() {
+  return state.trackMode === "experienced" ? "8 Weeks" : "16 Weeks";
+}
+
+function renderTimeline() {
+  const phases = getActiveRoadmapPhases();
+  let cursor = 1;
+  refs.roadmapTimeline.innerHTML = phases
+    .map((phase) => {
+      const weeks = Number(phase.duration.split(" ")[0]) || 1;
+      const from = cursor;
+      const to = cursor + weeks - 1;
+      cursor += weeks;
+      return `<li><span>Weeks ${from}-${to}</span> ${phase.id}</li>`;
+    })
+    .join("");
+}
+
+function renderTrackModeUI() {
+  if (!refs.trackModeToggle) return;
+  refs.trackModeToggle.querySelectorAll("[data-track-mode]").forEach((button) => {
+    const isActive = button.getAttribute("data-track-mode") === state.trackMode;
+    button.classList.toggle("active", isActive);
+    button.setAttribute("aria-selected", String(isActive));
+  });
+  refs.trackHint.textContent = TRACK_HINTS[state.trackMode];
+  refs.durationStat.textContent = getTrackDurationLabel();
+}
+
 function renderRoadmap() {
-  refs.roadmapGrid.innerHTML = roadmapPhases
+  const phases = getActiveRoadmapPhases();
+  refs.roadmapGrid.innerHTML = phases
     .map(
       (phase) => `
       <article class="phase-card fade-in">
@@ -765,6 +840,9 @@ function renderRoadmap() {
       </article>`
     )
     .join("");
+  renderTimeline();
+  renderTrackModeUI();
+  refs.sidebarMeta.textContent = `35 Chapters • ~${state.trackMode === "experienced" ? "120" : "180"} Hours`;
 }
 
 function groupByPhase() {
@@ -1000,6 +1078,7 @@ function enforceSingleExpandedPhase() {
 
 function getPhaseFromProgress() {
   const maxCompleted = Math.max(0, ...state.completed);
+  if (state.trackMode === "experienced" && maxCompleted === 0) return "Intermediate (Fast Track)";
   if (maxCompleted >= 31) return "Interview Mastery";
   if (maxCompleted >= 21) return "Advanced";
   if (maxCompleted >= 11) return "Intermediate";
@@ -1177,10 +1256,11 @@ function updateDashboard() {
   const completed = state.completed.length;
   const total = chapters.length;
   const percent = Math.round((completed / total) * 100);
+  const hoursPerChapter = state.trackMode === "experienced" ? 1.0 : 1.5;
 
   refs.completedMetric.textContent = `${completed} / ${total}`;
   refs.progressMetric.textContent = `${percent}%`;
-  refs.timeMetric.textContent = `${(completed * 1.5).toFixed(1)}h`;
+  refs.timeMetric.textContent = `${(completed * hoursPerChapter).toFixed(1)}h`;
   refs.phaseMetric.textContent = getPhaseFromProgress();
   refs.streakValue.textContent = `Streak: ${state.streak.count} day${state.streak.count > 1 ? "s" : ""}`;
 }
@@ -1214,6 +1294,19 @@ function bindGlobalEvents() {
     saveJson(STORAGE_KEYS.phases, state.phaseState);
     renderPhaseControls();
     renderNav(refs.chapterSearch.value);
+  });
+
+  refs.trackModeToggle?.addEventListener("click", (event) => {
+    const target = event.target.closest("[data-track-mode]");
+    if (!target) return;
+    const mode = target.getAttribute("data-track-mode");
+    if (!["fresher", "experienced"].includes(mode)) return;
+    if (mode === state.trackMode) return;
+
+    state.trackMode = mode;
+    localStorage.setItem(STORAGE_KEYS.trackMode, mode);
+    renderRoadmap();
+    updateDashboard();
   });
 
   refs.chapterSearch.addEventListener("input", () => {

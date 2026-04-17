@@ -80,7 +80,7 @@
               <p>Total Chapters</p>
             </article>
             <article>
-              <h3>16 Weeks</h3>
+              <h3 id="durationStat">16 Weeks</h3>
               <p>Estimated Duration</p>
             </article>
             <article>
@@ -92,7 +92,7 @@
 
         <div class="timeline-card" aria-label="Roadmap timeline">
           <h2>Roadmap Timeline</h2>
-          <ol>
+          <ol id="roadmapTimeline">
             <li><span>Weeks 1-4</span> Beginner Foundations</li>
             <li><span>Weeks 5-8</span> Intermediate Structures</li>
             <li><span>Weeks 9-12</span> Advanced Algorithms</li>
@@ -106,6 +106,16 @@
           <h2>Learning Dashboard</h2>
           <p>Track progress, consistency, and daily practice goals.</p>
         </div>
+
+        <article class="panel track-panel">
+          <h3>Track Selector</h3>
+          <p class="muted">Switch curriculum mode based on your profile. Your choice is saved automatically.</p>
+          <div id="trackModeToggle" class="track-toggle" role="tablist" aria-label="Track mode selection">
+            <button class="track-btn" data-track-mode="fresher" role="tab" aria-selected="true">Fresher Path</button>
+            <button class="track-btn" data-track-mode="experienced" role="tab" aria-selected="false">Experienced Fast-Track</button>
+          </div>
+          <p id="trackHint" class="muted"></p>
+        </article>
 
         <div class="dashboard-grid">
           <article class="panel metric">
